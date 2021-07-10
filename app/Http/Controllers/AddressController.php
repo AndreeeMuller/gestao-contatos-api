@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Address;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Http;
 
 class AddressController extends Controller
 {
@@ -114,6 +115,39 @@ class AddressController extends Controller
      */
     public function searchByPostalCode($postal_code)
     {
-        return Address::where('postal_code', '=', $postal_code)->get();
+        $response = Address::where('postal_code', '=', $postal_code)->get();
+
+        // Não localizou na base de dados
+        if (count($response) == 0) {
+
+            // Tenta localizar na API do ViaCEP
+            $address = Http::get('https://viacep.com.br/ws/'.$postal_code.'/json/');
+
+            // Não localizou novamente
+            if ($address['erro']) {
+                return [
+                    'status' => false,
+                    'message' => 'Address not found.'
+                ];
+            }
+
+            // Adiciona o endereço localizada no nossa base
+            $address = Address::create([
+                'state' => $address['uf'],
+                'city' => $address['localidade'],
+                'district' => $address['bairro'],
+                'address' => $address['logradouro'],
+                'postal_code' => str_replace('-', '', $address['cep']),
+                'ibge_code' => $address['ibge']
+            ]);
+
+            // Retorna o endereço localizado na base da ViaCEP
+            return [
+                $address
+            ];
+        }
+
+        // Retorna o endereço localizado na nossa base
+        return $response;
     }
 }
