@@ -74,6 +74,11 @@ class AddressController extends Controller {
      */
     public function update(Request $request, $id) {
         $address = Address::find($id);
+        if (!$address) {
+            return [
+                'message' => 'Address not found'
+            ];
+        }
         $address->update($request->all());
         return $address;
     }
