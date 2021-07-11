@@ -94,6 +94,33 @@ class AddressController extends Controller {
      * @param  string @postal_code
      * @return \Illuminate\Http\Response
      */
+    public function searchByAddressViaCEP($state, $city, $address) {
+        $addresses = json_decode(Http::get('https://viacep.com.br/ws/'.$state.'/'.$city.'/'.$address.'/json'));
+
+        foreach ($addresses as $address) {
+            $aux = Address::where('postal_code', '=', str_replace('-', '', $address->cep))->first();
+            if (!$aux) {
+                // Adiciona o endereço localizada no nossa base
+                Address::create([
+                    'state' => $address->uf,
+                    'city' => $address->localidade,
+                    'district' => $address->bairro,
+                    'address' => $address->logradouro,
+                    'postal_code' => str_replace('-', '', $address->cep),
+                    'ibge_code' => $address->ibge
+                ]);
+            }
+        }
+
+        return $addresses;
+    }
+
+    /**
+     * Search for a address
+     *
+     * @param  string @postal_code
+     * @return \Illuminate\Http\Response
+     */
     public function searchByAddress($address) {
         return Address::whereRaw('upper(address) like ? ', [ '%'.trim(Str::upper($address)).'%' ])->get();
     }
@@ -105,16 +132,22 @@ class AddressController extends Controller {
      * @return \Illuminate\Http\Response
      */
     public function searchByPostalCode($postal_code) {
+        if (strlen($postal_code) != 8) {
+            return [
+                'message' => 'Invalid postal code.'
+            ];
+        }
+
         $response = Address::where('postal_code', '=', $postal_code)->get();
 
         // Não localizou na base de dados
         if (count($response) == 0) {
 
             // Tenta localizar na API do ViaCEP
-            $address = Http::get('https://viacep.com.br/ws/'.$postal_code.'/json/');
+            $address = Http::get('https://viacep.com.br/ws/'.$postal_code.'/json');
 
             // Não localizou novamente
-            if ($address['erro']) {
+            if (isset($address['erro'])) {
                 return [];
             }
 

@@ -40,6 +40,7 @@ Route::group(['middleware' => ['auth:sanctum']], function () {
 
     // Addresses
     Route::resource('addresses', AddressController::class);
+    Route::get('/addresses/search/address/via-cep/{state}/{city}/{address}', [AddressController::class, 'searchByAddressViaCEP']);
     Route::get('/addresses/search/address/{address}', [AddressController::class, 'searchByAddress']);
     Route::get('/addresses/search/postal-code/{postal_code}', [AddressController::class, 'searchByPostalCode']);
 });
