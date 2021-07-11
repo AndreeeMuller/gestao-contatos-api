@@ -125,10 +125,7 @@ class AddressController extends Controller
 
             // Não localizou novamente
             if ($address['erro']) {
-                return [
-                    'status' => false,
-                    'message' => 'Address not found.'
-                ];
+                return [];
             }
 
             // Adiciona o endereço localizada no nossa base
