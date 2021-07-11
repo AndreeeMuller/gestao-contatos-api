@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\AddressController;
+use App\Http\Controllers\AuthController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -15,13 +16,30 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::resource('addresses', AddressController::class);
-Route::get('/addresses/search/address/{address}', [AddressController::class, 'searchByAddress']);
-Route::get('/addresses/search/postal-code/{postal_code}', [AddressController::class, 'searchByPostalCode']);
 
-// Route::get('/addresses', [AddressController::class, 'index']);
-// Route::post('/addresses',[AddressController::class, 'store']);
+// Public Routes
+Route::get('/login', function() {
+    return response([
+        'message' => 'Unauthenticated.'
+    ], 401);
+})->name('login');
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+
+// User
+Route::post('/register', [AuthController::class, 'register']);
+Route::post('/login', [AuthController::class, 'login']);
+
+// Protected Routes
+Route::group(['middleware' => ['auth:sanctum']], function () {
+
+    // User
+    Route::post('/logout', [AuthController::class, 'logout']);
+
+    // Addresses
+    Route::resource('addresses', AddressController::class);
+    Route::get('/addresses/search/address/{address}', [AddressController::class, 'searchByAddress']);
+    Route::get('/addresses/search/postal-code/{postal_code}', [AddressController::class, 'searchByPostalCode']);
 });

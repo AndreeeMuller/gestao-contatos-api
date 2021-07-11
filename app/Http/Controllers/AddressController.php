@@ -7,15 +7,13 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Http;
 
-class AddressController extends Controller
-{
+class AddressController extends Controller {
     /**
      * Display a listing of the resource.
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
-    {
+    public function index() {
         return Address::all();
     }
 
@@ -24,8 +22,7 @@ class AddressController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function create()
-    {
+    public function create() {
         //
     }
 
@@ -35,8 +32,7 @@ class AddressController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
-    {
+    public function store(Request $request) {
         $request->validate([
             'state' => 'required',
             'city' => 'required',
@@ -55,8 +51,7 @@ class AddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
-    {
+    public function show($id) {
         return Address::find($id);
     }
 
@@ -66,8 +61,7 @@ class AddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
+    public function edit($id) {
         //
     }
 
@@ -78,8 +72,7 @@ class AddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
-    {
+    public function update(Request $request, $id) {
         $address = Address::find($id);
         $address->update($request->all());
         return $address;
@@ -91,8 +84,7 @@ class AddressController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id)
-    {
+    public function destroy($id) {
         return Address::destroy($id);
     }
 
@@ -102,8 +94,7 @@ class AddressController extends Controller
      * @param  string @postal_code
      * @return \Illuminate\Http\Response
      */
-    public function searchByAddress($address)
-    {
+    public function searchByAddress($address) {
         return Address::whereRaw('upper(address) like ? ', [ '%'.trim(Str::upper($address)).'%' ])->get();
     }
 
@@ -113,8 +104,7 @@ class AddressController extends Controller
      * @param  string @postal_code
      * @return \Illuminate\Http\Response
      */
-    public function searchByPostalCode($postal_code)
-    {
+    public function searchByPostalCode($postal_code) {
         $response = Address::where('postal_code', '=', $postal_code)->get();
 
         // Não localizou na base de dados
